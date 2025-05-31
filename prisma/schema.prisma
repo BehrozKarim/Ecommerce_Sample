@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        String    @id @default(uuid()) @map("id") @db.Uuid
+  name      String    @unique @db.VarChar(255)
+  products  Product[]
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@map("category")
+}
+
+model Product {
+  id               String            @id @default(uuid()) @map("id") @db.Uuid
+  categoryId       String            @map("category_id") @db.Uuid
+  name             String            @unique @db.VarChar(255)
+  description      String?           @db.Text
+  price            Decimal           @db.Decimal(10, 2)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt        DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  category         Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  inventory        Inventory?
+  sales            Sale[]
+  inventoryHistory InventoryHistory[]
+
+  @@map("product")
+}
+
+model Inventory {
+  id                String   @id @default(uuid()) @map("id") @db.Uuid
+  productId         String   @unique @map("product_id") @db.Uuid
+  quantity          Int      @default(0)
+  lowStockThreshold Int      @default(10) @map("low_stock_threshold")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("inventory")
+}
+
+model Sale {
+  id        String    @id @default(uuid()) @map("id") @db.Uuid
+  productId String    @map("product_id") @db.Uuid
+  totalPrice Decimal   @map("total_price") @db.Decimal(10, 2)
+  quantity  Int
+  saleDate  DateTime  @default(now()) @map("sale_date") @db.Timestamptz()
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("sales")
+}
+
+model InventoryHistory {
+  id             String   @id @default(uuid()) @map("id") @db.Uuid
+  productId      String   @map("product_id") @db.Uuid
+  changeQuantity Int      @map("change_quantity")
+  newQuantity    Int      @map("new_quantity")
+  changedAt      DateTime @default(now()) @map("changed_at") @db.Timestamptz()
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("inventory_history")
+}
