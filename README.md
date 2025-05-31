@@ -21,6 +21,8 @@ Follow the steps given below to setup the backend.
 
 10. Now run the application using `npm start`. By default the program will run on port 3000.
 
+Feel Free to contact me at behrozbuzdar@gmail.com if you face any issues in the setup.
+
 ## Testing Instructions
 A postman collection `Ecommerce Sample APP.postman_collection` is present in the root of the project. 
 Import the collection inside postman and test the APIs. 
